@@ -14,7 +14,6 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -50,22 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('fitverse_token', newToken);
       localStorage.setItem('fitverse_user', JSON.stringify(newUser));
     } catch (error) {
-      throw new Error('Login failed');
-    }
-  };
-
-  const register = async (email: string, password: string, name: string) => {
-    try {
-      const response = await authAPI.register(email, password, name);
-      const { token: newToken, user: newUser } = response;
-      
-      setToken(newToken);
-      setUser(newUser);
-      
-      localStorage.setItem('fitverse_token', newToken);
-      localStorage.setItem('fitverse_user', JSON.stringify(newUser));
-    } catch (error) {
-      throw new Error('Registration failed');
+      throw new Error('Invalid email or password');
     }
   };
 
@@ -81,7 +65,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     user,
     token,
     login,
-    register,
     logout,
     isLoading,
     isAuthenticated: !!user && !!token

@@ -73,7 +73,7 @@ const initializeData = () => {
 
   sampleExercises.forEach(exercise => exercises.set(exercise.id, exercise));
 
-  // Sample user
+  // Sample user - only one demo account
   const hashedPassword = bcrypt.hashSync('password123', 10);
   users.set('user1', {
     id: 'user1',
@@ -111,60 +111,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Auth Routes
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { email, password, name } = req.body;
-
-    // Check if user already exists
-    const existingUser = Array.from(users.values()).find(u => u.email === email);
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const userId = uuidv4();
-    const user = {
-      id: userId,
-      email,
-      password: hashedPassword,
-      name,
-      level: 1,
-      xp: 0,
-      fitCoins: 100,
-      createdAt: new Date().toISOString(),
-      profile: {
-        age: null,
-        height: null,
-        weight: null,
-        fitnessGoals: []
-      }
-    };
-
-    users.set(userId, user);
-
-    // Generate token
-    const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '7d' });
-
-    res.status(201).json({
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        level: user.level,
-        xp: user.xp,
-        fitCoins: user.fitCoins
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
+// Auth Routes - Login only
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -552,8 +499,8 @@ initializeData();
 
 app.listen(PORT, () => {
   console.log(`🚀 FitVerse API Server running on port ${PORT}`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}/api/analytics/dashboard`);
-  console.log(`🔐 Auth endpoints: /api/auth/login, /api/auth/register`);
+  console.log(`📊 Demo Account: saikat@fitverse.com / password123`);
+  console.log(`🔐 Login endpoint: /api/auth/login`);
 });
 
 export default app;

@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Zap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const Login: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    name: ''
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, register } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +20,7 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        await login(formData.email, formData.password);
-      } else {
-        await register(formData.email, formData.password, formData.name);
-      }
+      await login(formData.email, formData.password);
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -74,50 +68,12 @@ const Login: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <div className="flex space-x-1 mb-6">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 ${
-                isLogin
-                  ? 'bg-white/20 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 ${
-                !isLogin
-                  ? 'bg-white/20 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Register
-            </button>
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
+            <p className="text-gray-300 mt-2">Sign in to continue your fitness journey</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                    placeholder="Enter your full name"
-                    required={!isLogin}
-                  />
-                </div>
-              </div>
-            )}
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Email Address
@@ -181,10 +137,10 @@ const Login: React.FC = () => {
               {loading ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>{isLogin ? 'Signing In...' : 'Creating Account...'}</span>
+                  <span>Signing In...</span>
                 </div>
               ) : (
-                <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                <span>Sign In to FitVerse</span>
               )}
             </motion.button>
           </form>
@@ -196,9 +152,12 @@ const Login: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.8 }}
           >
-            <p className="text-gray-300 text-sm mb-2">Demo Credentials:</p>
-            <p className="text-cyan-400 text-sm">Email: saikat@fitverse.com</p>
-            <p className="text-cyan-400 text-sm">Password: password123</p>
+            <p className="text-gray-300 text-sm mb-2 font-medium">Demo Account:</p>
+            <div className="space-y-1">
+              <p className="text-cyan-400 text-sm">📧 saikat@fitverse.com</p>
+              <p className="text-cyan-400 text-sm">🔑 password123</p>
+            </div>
+            <p className="text-gray-400 text-xs mt-2">Use these credentials to explore the app</p>
           </motion.div>
         </motion.div>
 
@@ -210,16 +169,16 @@ const Login: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
         >
           <div className="text-gray-300">
-            <div className="text-2xl font-bold text-cyan-400">AI</div>
-            <div className="text-xs">Coach</div>
+            <div className="text-2xl font-bold text-cyan-400">🤖</div>
+            <div className="text-xs">AI Coach</div>
           </div>
           <div className="text-gray-300">
-            <div className="text-2xl font-bold text-purple-400">VR</div>
-            <div className="text-xs">Workouts</div>
+            <div className="text-2xl font-bold text-purple-400">🥽</div>
+            <div className="text-xs">VR Workouts</div>
           </div>
           <div className="text-gray-300">
-            <div className="text-2xl font-bold text-green-400">Social</div>
-            <div className="text-xs">Community</div>
+            <div className="text-2xl font-bold text-green-400">👥</div>
+            <div className="text-xs">Social Hub</div>
           </div>
         </motion.div>
       </motion.div>
