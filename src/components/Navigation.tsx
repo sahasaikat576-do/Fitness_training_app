@@ -7,8 +7,10 @@ import {
   Users, 
   Activity, 
   Trophy,
-  Zap
+  Zap,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 interface NavigationProps {
   activeView: string;
@@ -16,6 +18,8 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeView, setActiveView }) => {
+  const { user, logout } = useAuth();
+
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Command Center', color: 'from-blue-500 to-cyan-500' },
     { id: 'aicoach', icon: Brain, label: 'AI Coach', color: 'from-purple-500 to-pink-500' },
@@ -83,6 +87,22 @@ const Navigation: React.FC<NavigationProps> = ({ activeView, setActiveView }) =>
                 </motion.button>
               );
             })}
+          </div>
+
+          {/* User Menu */}
+          <div className="flex items-center space-x-4">
+            <div className="hidden md:block text-right">
+              <div className="text-sm font-medium text-white">{user?.name}</div>
+              <div className="text-xs text-gray-400">Level {user?.level}</div>
+            </div>
+            <motion.button
+              onClick={logout}
+              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <LogOut className="h-5 w-5" />
+            </motion.button>
           </div>
 
           <div className="md:hidden flex space-x-1">

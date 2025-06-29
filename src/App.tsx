@@ -7,11 +7,14 @@ import VirtualGym from './components/VirtualGym';
 import SocialHub from './components/SocialHub';
 import BiometricTracker from './components/BiometricTracker';
 import GamificationCenter from './components/GamificationCenter';
+import Login from './components/Login';
 import { FitnessProvider } from './context/FitnessContext';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 
-function App() {
+const AppContent: React.FC = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     // Simulate app initialization
@@ -31,7 +34,7 @@ function App() {
     return views[activeView as keyof typeof views] || <Dashboard />;
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <motion.div
@@ -50,6 +53,10 @@ function App() {
         </motion.div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <Login />;
   }
 
   return (
@@ -71,6 +78,14 @@ function App() {
         </main>
       </div>
     </FitnessProvider>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
