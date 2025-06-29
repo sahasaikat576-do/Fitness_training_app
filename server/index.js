@@ -21,7 +21,7 @@ const achievements = new Map();
 const biometricData = new Map();
 
 // Initialize sample data
-const initializeData = () => {
+const initializeData = async () => {
   // Sample exercises
   const sampleExercises = [
     {
@@ -73,9 +73,9 @@ const initializeData = () => {
 
   sampleExercises.forEach(exercise => exercises.set(exercise.id, exercise));
 
-  // Sample user - only one demo account
-  const hashedPassword = bcrypt.hashSync('password123', 10);
-  users.set('user1', {
+  // Sample user - create with hashed password
+  const hashedPassword = await bcrypt.hash('password123', 10);
+  const demoUser = {
     id: 'user1',
     email: 'saikat@fitverse.com',
     password: hashedPassword,
@@ -90,7 +90,12 @@ const initializeData = () => {
       weight: 75,
       fitnessGoals: ['Build muscle', 'Lose fat', 'Improve endurance']
     }
-  });
+  };
+  
+  users.set('user1', demoUser);
+  console.log('✅ Demo user created successfully');
+  console.log('📧 Email:', demoUser.email);
+  console.log('🔑 Password: password123');
 };
 
 // Authentication middleware
@@ -115,35 +120,60 @@ const authenticateToken = (req, res, next) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    console.log('🔐 Login attempt:', { email, passwordLength: password?.length });
 
-    // Find user
-    const user = Array.from(users.values()).find(u => u.email === email);
-    if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
+
+    // Find user by email
+    const user = Array.from(users.values()).find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    if (!user) {
+      console.log('❌ User not found:', email);
+      return res.status(400).json({ error: 'Invalid email or password' });
+    }
+
+    console.log('👤 User found:', user.email);
 
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
+    
     if (!isValidPassword) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      console.log('❌ Invalid password for user:', email);
+      return res.status(400).json({ error: 'Invalid email or password' });
     }
 
+    console.log('✅ Password valid for user:', email);
+
     // Generate token
-    const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user.id, email: user.email }, 
+      JWT_SECRET, 
+      { expiresIn: '7d' }
+    );
+
+    console.log('🎫 Token generated for user:', email);
+
+    const userResponse = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      level: user.level,
+      xp: user.xp,
+      fitCoins: user.fitCoins
+    };
 
     res.json({
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        level: user.level,
-        xp: user.xp,
-        fitCoins: user.fitCoins
-      }
+      user: userResponse
     });
+
+    console.log('✅ Login successful for:', email);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('🚨 Login error:', error);
+    res.status(500).json({ error: 'Server error during login' });
   }
 });
 
@@ -494,13 +524,26 @@ const getWeekKey = (date) => {
   return `${year}-W${week.toString().padStart(2, '0')}`;
 };
 
-// Initialize data and start server
-initializeData();
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    users: users.size,
+    exercises: exercises.size
+  });
+});
 
-app.listen(PORT, () => {
-  console.log(`🚀 FitVerse API Server running on port ${PORT}`);
-  console.log(`📊 Demo Account: saikat@fitverse.com / password123`);
-  console.log(`🔐 Login endpoint: /api/auth/login`);
+// Initialize data and start server
+initializeData().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 FitVerse API Server running on port ${PORT}`);
+    console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`📊 Demo Account Credentials:`);
+    console.log(`   📧 Email: saikat@fitverse.com`);
+    console.log(`   🔑 Password: password123`);
+    console.log(`🔐 Login endpoint: POST /api/auth/login`);
+  });
 });
 
 export default app;
